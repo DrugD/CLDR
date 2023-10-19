@@ -1,0 +1,2 @@
+sleep 1h && echo "23:30" && sleep 1h && echo "0:30"  && sleep 1h && echo "1:30, code is going to run!"  
+python /home/lk/project/DALLE24Drug/CLIP4Drug/CLIP_DRP/main_zs_totalText_CLIP_then_MSE.py --config /home/lk/project/DALLE24Drug/CLIP4Drug/CLIP_DRP/config_GDSC/GraphDRP/GATGCNConvNet_TotalText_CLIP_then_MSE.yaml
