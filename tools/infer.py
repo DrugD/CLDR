@@ -18,6 +18,7 @@ import datetime
 from utils import *
 
 # from models.model_graphdrp import GraphDRP
+from models.model_transedrp_reg_num import TransEDRP
 from models.model_graphdrp_reg_num2 import GraphDRP
 import argparse
 from torch.optim.lr_scheduler import LambdaLR, MultiStepLR
@@ -310,7 +311,7 @@ if __name__ == "__main__":
     cuda_name = config["cuda_name"]
     seed_torch(config["seed"])
 
-    modeling = [GraphDRP][
+    modeling = [GraphDRP, TransEDRP][
         config["model_type"]
     ]
     model = modeling(config)

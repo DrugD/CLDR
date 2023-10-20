@@ -16,6 +16,7 @@ from utils import *
 
 # from models.model_graphdrp import GraphDRP
 from models.model_graphdrp_reg_num2 import GraphDRP
+from models.model_transedrp_reg_num import TransEDRP
 import argparse
 from torch.optim.lr_scheduler import LambdaLR, MultiStepLR
 import torch.nn as nn
@@ -75,7 +76,7 @@ def train(model, device, train_loader, optimizer, epoch, log_interval, args):
         # pdb.set_trace()
         
         labels = torch.arange(data.y.shape[0]).long().to(device) 
-        
+        # pdb.set_trace()
         drug_cell_logits = model.logit_scale * fusion_features @ text_logits.t()
         
         loss_dc = DC_cross_entropy_loss(drug_cell_logits, labels)
@@ -188,8 +189,13 @@ def dateStr():
 def main(config, yaml_path):
 
 
-
-    model = GraphDRP(config)
+    modeling = [GraphDRP, TransEDRP][
+        config["model_type"]
+    ]
+    model = modeling(config)
+    
+    # model = GraphDRP(config)
+    
     # model.load_state_dict(torch.load(
     #     "/home/lk/project/DALLE24Drug/CLIP4Drug/CLIP_DRP/exp/GAT_GCN_number/text_num_GDSCv2__20231011195851/GraphDRP.model", map_location=torch.device(device)), strict=True)
 

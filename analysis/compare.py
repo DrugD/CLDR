@@ -90,7 +90,7 @@ def main(model, config, yaml_path, show_type):
         text = clip.tokenize(descriptions,context_length=300).to(device)
         text_features = model.encode_num(text)
 
-    
+    pdb.set_trace()
     tsne(text_features)
   
     

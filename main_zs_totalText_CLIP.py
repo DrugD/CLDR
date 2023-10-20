@@ -138,21 +138,28 @@ def generate_samples(model, data, start, end, index):
     descriptions = []
     assert end - start == 1000
     # pdb.set_trace()
-    if model.training:
+    # if model.training:
     # for ic50 in range(start,end,1):
-        for ic50 in index:
-            des = "zero point " + num2english(ic50/1000)
-            descriptions.append(des)
-    else:
-        for ic50 in range(start,end,1):
-            des = "zero point " + num2english(ic50/1000)
-            descriptions.append(des)
-            
+    for idx, ic50 in enumerate(index):
+        # 
+        des = "The drug response value between " + data.smiles[idx] + " and "+ data.cell_name[idx] +" is "+"zero point " + num2english(ic50/1000)
+        descriptions.append(des)
+            # pdb.set_trace()
     text = clip.tokenize(descriptions,context_length=300).to(device)
     
     text_features = model.encode_num(text)
     
     return text_features
+    # else:
+    #     for ic50 in range(start,end,1):
+    #         des = "zero point " + num2english(ic50/1000)
+    #         descriptions.append(des)
+            
+    # text = clip.tokenize(descriptions,context_length=300).to(device)
+    
+    # text_features = model.encode_num(text)
+    
+    # return text_features
             
             
 def predicting(model, device, loader, loader_type, args):
@@ -382,7 +389,7 @@ def main(config, yaml_path):
     best_pearson = 1
     best_epoch = -1
 
-    model_file_name = work_dir + "/" + model_st + ".model"
+    
     result_file_name = work_dir + "/" + model_st + ".csv"
     loss_fig_name = work_dir + "/" + model_st + "_loss"
     pearson_fig_name = work_dir + "/" + model_st + "_pearson"
@@ -400,70 +407,71 @@ def main(config, yaml_path):
         reg_loss = train(
             model, device,  train_loader, optimizer, epoch + 1, log_interval, config
         )
-    
-        G, P = predicting(model, device, val_loader, "val", config)
-        ret = [rmse(G, P), mse(G, P), pearson(G, P), spearman(G, P)]
-        # pdb.set_trace()
+        model_file_name = work_dir + "/" + model_st + "_"+ str(epoch) +"epoch.model"
+        torch.save(model.state_dict(), model_file_name)
+        # G, P = predicting(model, device, val_loader, "val", config)
+        # ret = [rmse(G, P), mse(G, P), pearson(G, P), spearman(G, P)]
+        # # pdb.set_trace()
 
-        # if ret[1] < best_mse and epoch>10:
+        # # if ret[1] < best_mse and epoch>10:
 
-        train_losses.append(0)
-        val_losses.append(ret[1])
-        val_pearsons.append(ret[2])
+        # train_losses.append(0)
+        # val_losses.append(ret[1])
+        # val_pearsons.append(ret[2])
 
-        # draw_sort_pred_gt(P, G, title=work_dir + "/val_" +str(epoch))
+        # # draw_sort_pred_gt(P, G, title=work_dir + "/val_" +str(epoch))
 
 
 
-        if ret[1] < best_mse:
-            torch.save(model.state_dict(), model_file_name)
+        # if ret[1] < best_mse:
+        #     torch.save(model.state_dict(), model_file_name)
 
-            G_test, P_test = predicting(
-                model, device, test_loader, "test", config)
+        #     G_test, P_test = predicting(
+        #         model, device, test_loader, "test", config)
 
-            ret_test = [
-                rmse(G_test, P_test),
-                mse(G_test, P_test),
-                pearson(G_test, P_test),
-                spearman(G_test, P_test),
-                rankingLossFunc(torch.tensor(G_test), torch.tensor(
-                    P_test), torch.ones_like(torch.tensor(P_test))).item()
-            ]
-            # print(ret_test)
-            draw_sort_pred_gt(
-                P_test, G_test, title=work_dir + "/test_" + str(epoch))
+        #     ret_test = [
+        #         rmse(G_test, P_test),
+        #         mse(G_test, P_test),
+        #         pearson(G_test, P_test),
+        #         spearman(G_test, P_test),
+        #         rankingLossFunc(torch.tensor(G_test), torch.tensor(
+        #             P_test), torch.ones_like(torch.tensor(P_test))).item()
+        #     ]
+        #     # print(ret_test)
+        #     draw_sort_pred_gt(
+        #         P_test, G_test, title=work_dir + "/test_" + str(epoch))
         
-            with open(result_file_name, "a") as f:
-                f.write("\n " + str(epoch))
-                f.write("\n rmse:"+str(ret_test[0]))
-                f.write("\n mse:"+str(ret_test[1]))
-                f.write("\n pearson:"+str(ret_test[2]))
-                f.write("\n spearman:"+str(ret_test[3]))
-                f.write("\n rankingloss:"+str(ret_test[4])+"\n")
+        #     with open(result_file_name, "a") as f:
+        #         f.write("\n " + str(epoch))
+        #         f.write("\n rmse:"+str(ret_test[0]))
+        #         f.write("\n mse:"+str(ret_test[1]))
+        #         f.write("\n pearson:"+str(ret_test[2]))
+        #         f.write("\n spearman:"+str(ret_test[3]))
+        #         f.write("\n rankingloss:"+str(ret_test[4])+"\n")
                 
-            best_epoch = epoch + 1
-            best_mse = ret[1]
-            best_pearson = ret[2]
-            print(
-                " rmse improved at epoch ",
-                best_epoch,
-                "; best_mse:",
-                best_mse,
-                model_st,
-            )
+        #     best_epoch = epoch + 1
+        #     best_mse = ret[1]
+        #     best_pearson = ret[2]
+        #     print(
+        #         " rmse improved at epoch ",
+        #         best_epoch,
+        #         "; best_mse:",
+        #         best_mse,
+        #         model_st,
+        #     )
 
-        else:
-            print(
-                " no improvement since epoch ",
-                best_epoch,
-                "; best_mse, best pearson:",
-                best_mse,
-                best_pearson,
-                model_st,
-            )
+        # else:
+        #     print(
+        #         " no improvement since epoch ",
+        #         best_epoch,
+        #         "; best_mse, best pearson:",
+        #         best_mse,
+        #         best_pearson,
+        #         model_st,
+        #     )
 
-        draw_loss(train_losses, val_losses, loss_fig_name)
-        draw_pearson(val_pearsons, pearson_fig_name)
+        # draw_loss(train_losses, val_losses, loss_fig_name)
+        # draw_pearson(val_pearsons, pearson_fig_name)
 
 
 def seed_torch(seed=42):
