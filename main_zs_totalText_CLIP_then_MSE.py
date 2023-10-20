@@ -46,24 +46,24 @@ eot_token = _tokenizer.encoder["<|endoftext|>"]
 
 from multiprocessing import Queue,Process
 
-def get_distribution(labels):
+# def get_distribution(labels):
     
-    def normal_distribution(x, mean, sigma):
-        return np.exp(-1*((x-mean)**2)/(2*(sigma**2)))/(math.sqrt(2*np.pi)* sigma)
+#     def normal_distribution(x, mean, sigma):
+#         return np.exp(-1*((x-mean)**2)/(2*(sigma**2)))/(math.sqrt(2*np.pi)* sigma)
     
     
-    temp = torch.Tensor().to(labels.device)
+#     temp = torch.Tensor().to(labels.device)
     
-    assert (max(labels)*1000).item()<1000
+#     assert (max(labels)*1000).item()<1000
     
-    for label in labels:
-        mean, sigma= (label*1000).int().item(), 100
-        x= np.linspace(0, 1000,1000)
-        y = normal_distribution(x, mean, sigma).reshape(1,-1)
-        temp = torch.cat(
-                (temp, torch.tensor(y).to(labels.device)), 0)
+#     for label in labels:
+#         mean, sigma= (label*1000).int().item(), 100
+#         x= np.linspace(0, 1000,1000)
+#         y = normal_distribution(x, mean, sigma).reshape(1,-1)
+#         temp = torch.cat(
+#                 (temp, torch.tensor(y).to(labels.device)), 0)
     
-    return temp
+#     return temp
 
 def train(model, device, train_loader, optimizer, epoch, log_interval, args):
     print("Training on {} samples...".format(len(train_loader.dataset)))
@@ -120,105 +120,105 @@ def train(model, device, train_loader, optimizer, epoch, log_interval, args):
     return sum(avg_loss) / len(avg_loss)
 
 
-def generate_samples(model, data, start, end, indexs):
-    # data: list, consist of [drug smile, cell line, ic50]
-    descriptions = []
-    assert end - start == 1000
+# def generate_samples(model, data, start, end, indexs):
+#     # data: list, consist of [drug smile, cell line, ic50]
+#     descriptions = []
+#     assert end - start == 1000
     
-    if model.training:
-    # for ic50 in range(start,end,1):
-        for idx, ic50 in enumerate(indexs):
-            # 
-            des = "The drug response value between " + data.smiles[idx] + " and "+ data.cell_name[idx] +" is "+"zero point " + num2english(ic50/1000)
-            descriptions.append(des)
-                # pdb.set_trace()
-        text = clip.tokenize(descriptions,context_length=300).to(device)
+#     if model.training:
+#     # for ic50 in range(start,end,1):
+#         for idx, ic50 in enumerate(indexs):
+#             # 
+#             des = "The drug response value between " + data.smiles[idx] + " and "+ data.cell_name[idx] +" is "+"zero point " + num2english(ic50/1000)
+#             descriptions.append(des)
+#                 # pdb.set_trace()
+#         text = clip.tokenize(descriptions,context_length=300).to(device)
         
-        text_features = model.encode_num(text)
+#         text_features = model.encode_num(text)
         
-        return text_features
+#         return text_features
     
-    else:
+#     else:
         
-        with torch.no_grad():
-            text_features = torch.Tensor().to(data.x.device)
-            descriptions_text = []
-            for ic50 in range(start,end,1):
-                des = "zero point " + num2english(ic50/1000)
-                descriptions.append(des)
+#         with torch.no_grad():
+#             text_features = torch.Tensor().to(data.x.device)
+#             descriptions_text = []
+#             for ic50 in range(start,end,1):
+#                 des = "zero point " + num2english(ic50/1000)
+#                 descriptions.append(des)
             
             
             
             
-            for data_item_idx in  tqdm(range(len(data))):
-                des = "The drug response value between " + data.smiles[data_item_idx] + " and "+ data.cell_name[data_item_idx] +" is "
+#             for data_item_idx in  tqdm(range(len(data))):
+#                 des = "The drug response value between " + data.smiles[data_item_idx] + " and "+ data.cell_name[data_item_idx] +" is "
                 
-                num_works = 1
-                def worker(q, i, start, end, descriptions):
-                    # print("worker:",i, ',\t',start, end)
-                    result = [[sot_token]+_tokenizer.encode(des+x)+[eot_token]  for x in descriptions[start:end]]
-                    # print(len(descriptions))
-                    # print(len(descriptions[start:end]))
-                    # x = descriptions[start:end][0]
-                    # print("x:",x)
-                    # result = [[sot_token]+_tokenizer.encode(des+x)+[eot_token]]
-                    # print(len(result))
-                    q.put(result)
+#                 num_works = 1
+#                 def worker(q, i, start, end, descriptions):
+#                     # print("worker:",i, ',\t',start, end)
+#                     result = [[sot_token]+_tokenizer.encode(des+x)+[eot_token]  for x in descriptions[start:end]]
+#                     # print(len(descriptions))
+#                     # print(len(descriptions[start:end]))
+#                     # x = descriptions[start:end][0]
+#                     # print("x:",x)
+#                     # result = [[sot_token]+_tokenizer.encode(des+x)+[eot_token]]
+#                     # print(len(result))
+#                     q.put(result)
 
-                # pdb.set_trace()
+#                 # pdb.set_trace()
                 
-                q = Queue()
-                # print([(i* len(data)*1000/10 ,(i+1)* len(data)*1000/10) for i in range(10)])
-                thread_list = []
+#                 q = Queue()
+#                 # print([(i* len(data)*1000/10 ,(i+1)* len(data)*1000/10) for i in range(10)])
+#                 thread_list = []
                 
-                for i in range(num_works):
-                    th = Process( target=worker, args=(q, i, int(i* len(descriptions)/num_works ), int((i+1)* len(descriptions)/num_works) , descriptions) )
-                    thread_list.append(th)
-                    th.start()
+#                 for i in range(num_works):
+#                     th = Process( target=worker, args=(q, i, int(i* len(descriptions)/num_works ), int((i+1)* len(descriptions)/num_works) , descriptions) )
+#                     thread_list.append(th)
+#                     th.start()
                     
-                    # process = [Process(target=worker, args=(q, i, int(i* len(descriptions)/10 ), int((i+1)* len(descriptions)/10) , descriptions)) for i in range(10)]
+#                     # process = [Process(target=worker, args=(q, i, int(i* len(descriptions)/10 ), int((i+1)* len(descriptions)/10) , descriptions)) for i in range(10)]
                 
-                temp = []
+#                 temp = []
                 
-                for th_item in thread_list:
-                    while th_item.is_alive():
-                        while False == q.empty():
-                            result = q.get()
-                            temp.extend(result)
+#                 for th_item in thread_list:
+#                     while th_item.is_alive():
+#                         while False == q.empty():
+#                             result = q.get()
+#                             temp.extend(result)
                             
-                for th_item in thread_list:
-                    th_item.join()
+#                 for th_item in thread_list:
+#                     th_item.join()
 
 
                 
-                # temp = []
-                # while not q.empty():
-                #     result = q.get()
-                    # temp.append(result)
-                # temp = [[sot_token]+_tokenizer.encode(des+x)+[eot_token]  for x in descriptions]
-                # 
-                # pdb.set_trace()
-                # print("temp:",len(temp))
-                descriptions_text.extend(temp)
+#                 # temp = []
+#                 # while not q.empty():
+#                 #     result = q.get()
+#                     # temp.append(result)
+#                 # temp = [[sot_token]+_tokenizer.encode(des+x)+[eot_token]  for x in descriptions]
+#                 # 
+#                 # pdb.set_trace()
+#                 # print("temp:",len(temp))
+#                 descriptions_text.extend(temp)
             
             
-            pdb.set_trace()
-            text = clip.tokenize_test(descriptions_text,context_length=300).to(device)
-            # descriptions_num = torch.cat((descriptions_num,text),0)
-            text_feature = model.encode_num(text)
-            text_features = torch.cat((text_features, text_feature.unsqueeze(0)),0)
+#             pdb.set_trace()
+#             text = clip.tokenize_test(descriptions_text,context_length=300).to(device)
+#             # descriptions_num = torch.cat((descriptions_num,text),0)
+#             text_feature = model.encode_num(text)
+#             text_features = torch.cat((text_features, text_feature.unsqueeze(0)),0)
                  
             
-            pdb.set_trace()
-            # torch.cat((descriptions_num,text),0)
+#             pdb.set_trace()
+#             # torch.cat((descriptions_num,text),0)
             
            
             
-            # text_features = (text_feature)
+#             # text_features = (text_feature)
             
                 
                 
-            return text_features
+#             return text_features
             
             
             
