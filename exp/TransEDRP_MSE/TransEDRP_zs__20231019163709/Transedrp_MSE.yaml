@@ -3,7 +3,7 @@ model_name: TransE
 
 marker: TransEDRP_MSE
 
-cuda_name: cuda:1
+cuda_name: cuda:2
 
 work_dir: TransEDRP_zs
 batch_size: 

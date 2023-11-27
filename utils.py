@@ -156,19 +156,26 @@ def load(config):
             test_data = ConcatDataset(data_list_test)
             return train_data, test_data
         
-        # elif config['dataset_name'] = 'NCI60':
-        #     test_smiles_pt = np.load("/home/lk/project/NCI60_drug_name.npy")
-        #     for pt_item in tqdm(os.listdir(config['dataset_path'])[:int(len(os.listdir(config['dataset_path']))*config['scale'])]):
-        #         if pt_item in test_smiles_pt:
+        elif config['dataset_name'] == 'CellMiner':
+            test_smiles_pt = np.load("/home/lk/project/MSDA/data/process/NCI60_dataset/NCI60_drug_smiles_test.npy")
+            for pt_item in tqdm(os.listdir(config['dataset_type']['dataset_path'])[:int(len(os.listdir(config['dataset_type']['dataset_path']))*config['dataset_type']['scale'])]):
+                
+                pt_data = DRPDataset(dataset_path = os.path.join(config['dataset_type']['dataset_path'],pt_item))
+
+                if len(pt_data[0].smiles)>=290:
+                    print(pt_data[0].smiles)
+                    continue
+                
+                if pt_data[0].smiles in test_smiles_pt:
                     
-        #             pt_data = DRPDataset(dataset_path = os.path.join(config['dataset_path'],pt_item))
-        #             data_list_test.append(pt_data)
-        #         else:
-        #             data_list_train.append(pt_data)
                     
-        #     train_data = ConcatDataset(data_list_train)
-        #     test_data = ConcatDataset(data_list_test)
-        #     return train_data, test_data
+                    data_list_test.append(pt_data)
+                else:
+                    data_list_train.append(pt_data)
+                    
+            train_data = ConcatDataset(data_list_train)
+            test_data = ConcatDataset(data_list_test)
+            return train_data, test_data
     
 def get_dict_smiles2pt(config):
     data_map = {}
@@ -373,13 +380,18 @@ def draw_sort_pred_gt_classed(pred,gt,title,dataloader,marker):
     return result_drugs
 
 
-def num2english(num):
-    num = str(round(num,3)).split('.')[1]
+def num2english(num, PRECISION=3):
+    num = str(round(num,PRECISION)).split('.')[1]
+    
+    while len(num)!=PRECISION:
+        num = num + '0'
+
     L1 = ["zero","one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"]
     word = ""
     for i in str(num):
         # pdb.set_trace()
         word= word+" "+L1[int(i)]
+   
     return word
 
 

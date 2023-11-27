@@ -1,17 +1,17 @@
 model_type: 1
 model_name: TransE
 
-marker: TransEDRP_CLIP_then_MSE
+marker: TransEDRP_CLIP_Number_then_MSE
 
-cuda_name: cuda:2
+cuda_name: cuda:0
 
-work_dir: TransEDRP_zs_17epoch
+work_dir: TransEDRP_zs_40epoch
 batch_size: 
   train: 256 
   val: 256
   test: 256 
 lr: 0.00001
-num_epoch: 50
+num_epoch: 35
 log_interval: 50
 seed: 171
 
@@ -56,7 +56,7 @@ model:
 
   fusion_module:
     fc_1_dim: 1024
-    fc_2_dim: 128
+    fc_2_dim: 256
     fc_3_dim: 1
     dropout: 0.5
     transformer_dropout: 0.5

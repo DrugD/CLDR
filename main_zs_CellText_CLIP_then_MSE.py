@@ -169,7 +169,7 @@ def main(config, yaml_path):
 
     model = GraphDRP(config)
     model.load_state_dict(torch.load(
-        "/home/lk/project/DALLE24Drug/CLIP4Drug/CLIP_DRP/exp/GAT_GCN_CLIP_Cell_Text/GDSCv2_zs__20231020171410/GraphDRP_10epoch.model", map_location=torch.device(device)), strict=True)
+        "/home/lk/project/DALLE24Drug/CLIP4Drug/CLIP_DRP/exp/GAT_GCN_CLIP_Cell_Text_DA/GDSCv2_zs__20231022154106/GraphDRP_97epoch.model", map_location='cpu'), strict=True)
 
     model.to(device)
 

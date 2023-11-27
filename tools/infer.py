@@ -18,7 +18,10 @@ import datetime
 from utils import *
 
 # from models.model_graphdrp import GraphDRP
-from models.model_transedrp_reg_num import TransEDRP
+# from models.model_transedrp_reg_num import TransEDRP
+from models.model_transedrp_reg_KGE import TransEDRP
+
+
 from models.model_graphdrp_reg_num2 import GraphDRP
 import argparse
 from torch.optim.lr_scheduler import LambdaLR, MultiStepLR
@@ -105,8 +108,8 @@ def predicting(model, device, loader, loader_type, args):
             data = data.to(device)
             # data_ = deepcopy(data)
             
-            pred, _ = model(data)
-            
+            pred, _ = model.infer(data)
+            # pred, _ = model(data)
             # gt_sentence_features = generate_samples(model, data, 0, 1000, (data.y*1000).int().cpu().numpy())
             # # gt_sentence_features = gt_sentence_features/gt_sentence_features.norm(dim=1,keepdim=True)
             # gt_sentence_features = gt_sentence_features.repeat(data.y.size()[0],1,1)

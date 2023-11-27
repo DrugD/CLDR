@@ -16,6 +16,9 @@ from utils import *
 
 # from models.model_graphdrp import GraphDRP
 from models.model_graphdrp_reg_num2 import GraphDRP
+from models.model_transedrp_reg_KGE_just_number import TransEDRP
+
+
 import argparse
 from torch.optim.lr_scheduler import LambdaLR, MultiStepLR
 import torch.nn as nn
@@ -135,7 +138,8 @@ def generate_samples(model, data, start, end, index):
         model.train()
         text = clip.tokenize(descriptions,context_length=300).to(device)
         text_features = model.encode_num(text)
-        
+        return text_features
+    
     else:
         for ic50 in range(start,end,1):
             des = "zero point " + num2english(ic50/1000)
@@ -143,11 +147,14 @@ def generate_samples(model, data, start, end, index):
             
         with torch.no_grad():
             model.eval()
-            text = clip.tokenize(descriptions,context_length=300).to(device)
-            text_features = model.encode_num(text)
-    
- 
-    return text_features
+            text = clip.tokenize(descriptions,context_length=100).to(device)
+            number_features = model.encode_num(text)
+            sentence_features = torch.cat((number_features,number_features),axis=1)
+            sentence_features = model.transformer_fusion(sentence_features)
+            sentence_features = sentence_features / sentence_features.norm(dim=1, keepdim=True)
+
+        return sentence_features
+
             
             
 def predicting(model, device, loader, loader_type, args):
@@ -160,7 +167,7 @@ def predicting(model, device, loader, loader_type, args):
             data = data.to(device)
             data_ = deepcopy(data)
             
-            _, fusion_features = model(data)
+            fusion_features = model.infer(data)
             
             gt_sentence_features = generate_samples(model, data, 0, 1000, (data.y*1000).int().cpu().numpy())
             # gt_sentence_features = gt_sentence_features/gt_sentence_features.norm(dim=1,keepdim=True)
@@ -195,11 +202,11 @@ def main(config, yaml_path, infer_model):
 
 
 
-    model = GraphDRP(config)
-    # model.load_state_dict(torch.load(
-    #     "/home/lk/project/DALLE24Drug/CLIP4Drug/CLIP_DRP/exp/GAT_GCN_number/text_num_GDSCv2__20231011195851/GraphDRP.model", map_location=torch.device(device)), strict=True)
-    device = torch.device(cuda_name if torch.cuda.is_available() else "cpu")
-    
+    model = TransEDRP(config)
+    model.load_state_dict(torch.load(
+        infer_model, map_location=torch.device('cpu')), strict=True)
+    # device = torch.device(cuda_name if torch.cuda.is_available() else "cpu")
+    model.to(device)
 
 
     train_batch = config["batch_size"]["train"]
@@ -262,12 +269,12 @@ def main(config, yaml_path, infer_model):
         margin=0.0, reduction='mean')
 
 
-    pdb.set_trace()
-    torch.save(model.state_dict(), model_file_name)
-    model.to(device)
-    pdb.set_trace()
-    model.load_state_dict(torch.load(infer_model, map_location='cpu'))
-    pdb.set_trace()
+    # pdb.set_trace()
+    # torch.save(model.state_dict(), model_file_name)
+    # model.to(device)
+    # pdb.set_trace()
+    # model.load_state_dict(torch.load(infer_model, map_location='cpu'))
+    # pdb.set_trace()
     # G, P = predicting(model, device, val_loader, "val", config)
     # ret = [rmse(G, P), mse(G, P), pearson(G, P), spearman(G, P)]
     # pdb.set_trace()

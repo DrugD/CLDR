@@ -4,7 +4,7 @@ model_name: GraphDRP
 # marker: GAT_GCN_number_zs_3*1000
 marker: GAT_GCN_MSE
 
-cuda_name: cuda:0
+cuda_name: cuda:2
 
 # work_dir: GAT_GCN
 work_dir: GDSCv2_zs
